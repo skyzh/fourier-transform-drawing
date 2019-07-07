@@ -15,7 +15,7 @@ t = linspace(0, 1, n)
 
 # print(t)
 
-freq_range = 400
+freq_range = 100
 
 freq_map = dict()
 

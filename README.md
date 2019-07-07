@@ -5,6 +5,16 @@ Inspired by [3Blue1Brown - Pure Fourier series animations for 12 oddly satisfyin
 
 Example svg from [Wikimedia](https://commons.wikimedia.org/wiki/Category:SVG_musical_notation#/media/File:Do_Mayor_armadura.svg)
 
+You may view the result at [https://skyzh.github.io/fourier-transform-drawing/](https://skyzh.github.io/fourier-transform-drawing/)
+
+## What does it do
+
+Let **f** : R -> R^2, **f** denotes a function from time **t** to complex plane.
+
+**f** represents a svg path. Obtain fourier series of **f**.
+
+On the webpage a blue circle represents one term in the series.
+
 ## Generation Steps
 
 0. Install Python, Node.js, etc. Run `yarn start` to start dev server. Visit web page at `http://localhost:8080`

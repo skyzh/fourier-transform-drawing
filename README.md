@@ -19,7 +19,7 @@ On the webpage a blue circle represents one term in the series.
 
 0. Install Python, Node.js, etc. Run `yarn start` to start dev server. Replace SVG path in `index.html`. Visit web page at `http://localhost:8080`
 1. Edit `transform_point` function, watch pattern in `Original SVG`, adjust until the pattern fills the canvas.
-2. Click **Dump SVG Data**. Note that it may take a long time. Copy `fft_data.json` to analysis folder.
+2. Click **Dump SVG Data**. Note that it may take a long time. View progress in console. Copy `fft_data.json` to analysis folder.
 3. Adjust `freq_range` in analysis.py. Run `./analysis.py > dump.json`.
 4. Run `yarn start` again to see the result. You may see pattern like this
 

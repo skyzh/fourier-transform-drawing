@@ -138,10 +138,14 @@ function dump_svg() {
   let i = 0
   const loc = []
   console.log('generation start')
+  let cnt = 0
   while (i < 1) {
-    i += 0.000005
+    i += 0.000001
     const p = transform_point(get_point(i))
     loc.push({ x: p.x, y: p.y })
+    if ((cnt++) % 10000 == 0) {
+      console.log(`dump progress ${Math.round(i * 10000) / 100}%`)
+    }
   }
   window.fft_data = loc
   console.log(loc)

@@ -14,8 +14,7 @@ function transform_point(p) {
 }
 
 const ctx = $('#fft-canvas')[0].getContext('2d')
-
-window.ctx = ctx
+const ctx_ = $('#original-canvas')[0].getContext('2d')
 
 let t = 0
 
@@ -27,25 +26,69 @@ function progress(t) {
 
 let draw_original = false
 
-function dispatch_get_point(t) {
-  if (draw_original) {
-    return transform_point(get_point(t))
-  } else {
-    return get_point_fft(t)
-  }
+function line_to_point(ctx, p) {
+  ctx.lineTo(p.x, p.y)
 }
+
+function move_to_point(ctx, p) {
+  ctx.moveTo(p.x, p.y)
+}
+
+function update_d3(points) {
+  const svg = d3.select('#d3-svg')
+  svg.selectAll('.vector')
+    .data(points)
+      .attr('x1', p => p.x)
+      .attr('y1', p => p.y)
+      .attr('x2', p => p.x + p.p.x)
+      .attr('y2', p => p.y + p.p.y)
+    .enter()
+      .append('line')
+      .attr('class', 'vector')
+      .attr('stroke', '#292F36')
+      .attr('stroke-width', '0.3')
+      .attr('stroke-linecap', 'round')
+    .exit()
+      .remove()
+  svg.selectAll('.circle')
+    .data(points)
+      .attr('cx', p => p.x)
+      .attr('cy', p => p.y)
+      .attr('r', p => p.r)
+    .enter()
+      .append('circle')
+      .attr('class', 'circle')
+      .attr('stroke', '#4ECDC4')
+      .attr('stroke-width', '0.3')
+      .attr('fill', 'none')
+    .exit()
+      .remove()
+}
+
 function run() {
-  ctx.beginPath()
-  const p = dispatch_get_point(t)
-  const x = p.x
-  const y = p.y
-  ctx.moveTo(x, y)
+  {
+    ctx.beginPath()
+    const p = get_point_fft(t)
+    move_to_point(ctx, p)
+  }
+  {
+    ctx_.beginPath()
+    const p = transform_point(get_point(t))
+    move_to_point(ctx_, p)
+  }
   t = progress(t)
-  const p_ = dispatch_get_point(t)
-  const x_ = p_.x
-  const y_ = p_.y
-  ctx.lineTo(x_, y_)
-  ctx.stroke()
+  {
+    const p = get_point_fft(t)
+    update_d3(p.points)
+    line_to_point(ctx, p)
+    ctx.stroke()
+  }
+  {
+    const p = transform_point(get_point(t))
+    line_to_point(ctx_, p)
+    ctx_.stroke()
+  }
+  $('#d-status').text(`t = ${Math.round(t * 1000) / 1000}`)
   window.requestAnimationFrame(run)
 }
 
@@ -66,20 +109,24 @@ function complex_mul(a, b) {
 }
 
 const freq_map = require('../analysis/dump.json')
-
+const max_freq = _.max(_.keys(freq_map))
+const freq_seq = _.sortBy(_.keys(freq_map), Math.abs)
 console.log(freq_map)
 
 function get_point_fft(t) {
   let x = 0, y = 0
-  _.forIn(freq_map, (c_n, i) => {
+  let points = _.map(freq_seq, i => {
+    const c_n = freq_map[i]
     const p = complex_mul(
       exp_i(2 * i * Math.PI, t),
       c_n
     )
+    const result =  { x, y, p, r: Math.sqrt(c_n.x * c_n.x + c_n.y * c_n.y) }
     x += p.x
     y += p.y
+    return result
   })
-  return { x, y }
+  return { x, y, points }
 }
 
 $(document).ready(() => {

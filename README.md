@@ -7,7 +7,7 @@ Example svg from [Wikimedia](https://commons.wikimedia.org/wiki/Category:SVG_mus
 
 ## Generation Steps
 
-0. Install Python, Node.js, etc. Run `yarn start` to start dev server. Visit web page at `http//:localhost:8080`
+0. Install Python, Node.js, etc. Run `yarn start` to start dev server. Visit web page at `http://localhost:8080`
 1. Edit `transform_point` function, click on **Draw Original SVG**, adjust until the pattern fill the canvas.
 2. Click **Dump SVG Data**. Note that it may take a long time. Copy `fft_data.json` to analysis folder.
 3. Adjust `freq_range` in analysis.py. Run `./analysis.py > dump.json`.

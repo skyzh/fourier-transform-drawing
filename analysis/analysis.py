@@ -1,8 +1,9 @@
+#!/usr/bin/env python3
 import json
 from numpy import array, exp, sum, arange, pi, linspace, real, imag
 
 fp = open("fft_data.json")
-fft_data = json.load(fp)["data"]
+fft_data = json.load(fp)
 complex_real = array(list(map(lambda d: d["x"], fft_data)))
 complex_imag = array(list(map(lambda d: d["y"], fft_data)))
 complex_data = complex_real + 1j * complex_imag
@@ -14,7 +15,7 @@ t = linspace(0, 1, n)
 
 # print(t)
 
-freq_range = 200
+freq_range = 400
 
 freq_map = dict()
 

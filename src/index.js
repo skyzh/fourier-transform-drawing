@@ -25,14 +25,23 @@ function progress(t) {
   return t
 }
 
+let draw_original = false
+
+function dispatch_get_point(t) {
+  if (draw_original) {
+    return transform_point(get_point(t))
+  } else {
+    return get_point_fft(t)
+  }
+}
 function run() {
   ctx.beginPath()
-  const p = transform_point(get_point_fft(t))
+  const p = dispatch_get_point(t)
   const x = p.x
   const y = p.y
   ctx.moveTo(x, y)
-  _t = progress(t)
-  const p_ = transform_point(get_point_fft(_t))
+  t = progress(t)
+  const p_ = dispatch_get_point(t)
   const x_ = p_.x
   const y_ = p_.y
   ctx.lineTo(x_, y_)
@@ -41,36 +50,6 @@ function run() {
 }
 
 window.requestAnimationFrame(run)
-
-function run2() {
-  ctx.beginPath()
-  const p = transform_point(get_point(t))
-  const x = p.x
-  const y = p.y
-  ctx.moveTo(x, y)
-  _t = progress(t)
-  const p_ = transform_point(get_point(_t))
-  const x_ = p_.x
-  const y_ = p_.y
-  ctx.lineTo(x_, y_)
-  ctx.stroke()
-  t = progress(t)
-  window.requestAnimationFrame(run2)
-}
-
-window.requestAnimationFrame(run2)
-
-function integrate(f, t1, t2) {
-  let sum = { x: 0, y: 0 }
-  const n = 100000
-  for (let i = 0; i < n; i++) {
-    const t = Math.random() * (t2 - t1) + t1
-    const p = f(t)
-    sum.x += p.x
-    sum.y += p.y
-  }
-  return { x: sum.x / n, y: sum.y / n }
-}
 
 function exp_i(a, t) {
   return {
@@ -86,42 +65,65 @@ function complex_mul(a, b) {
   }
 }
 
-freq_map = {}
-const freq_max = 50
-/*
-for (let i = -freq_max; i <= freq_max; i++) {
-  const fn = t => complex_mul(get_point(t), exp_i(-2 * i * Math.PI, t))
-  freq_map[i] = integrate(fn, 0, 1)
-  console.log(i, freq_map[i])
-}
-*/
+const freq_map = require('../analysis/dump.json')
 
-freq_map = require('../analysis/dump.json')
-
-// console.log(freq_map)
+console.log(freq_map)
 
 function get_point_fft(t) {
   let x = 0, y = 0
-  for (let i = -freq_max; i <= freq_max; i++) {
+  _.forIn(freq_map, (c_n, i) => {
     const p = complex_mul(
       exp_i(2 * i * Math.PI, t),
-      freq_map[i]
+      c_n
     )
     x += p.x
     y += p.y
-  }
+  })
   return { x, y }
 }
 
-/*
+$(document).ready(() => {
+  $('#btn-dump').click(dump_svg)
+  $('#btn-original').click(() => draw_original = true)
+})
 
-let i = 0
-const loc = []
-while(i < 1) {
-  i += 0.00001
-  const p = get_point(i)
-  loc.push({x:p.x, y:p.y})
+function dump_svg() {
+  let i = 0
+  const loc = []
+  console.log('generation start')
+  while (i < 1) {
+    i += 0.000005
+    const p = transform_point(get_point(i))
+    loc.push({ x: p.x, y: p.y })
+  }
+  window.fft_data = loc
+  console.log(loc)
+  console.save(loc, 'fft_data.json')
 }
 
-console.log(loc)
-*/
+// http://bgrins.github.io/devtools-snippets/#console-save
+(function (console) {
+  console.save = function (data, filename) {
+
+    if (!data) {
+      console.error('Console.save: No data')
+      return;
+    }
+
+    if (!filename) filename = 'console.json'
+
+    if (typeof data === "object") {
+      data = JSON.stringify(data, undefined, 4)
+    }
+
+    var blob = new Blob([data], { type: 'text/json' }),
+      e = document.createEvent('MouseEvents'),
+      a = document.createElement('a')
+
+    a.download = filename
+    a.href = window.URL.createObjectURL(blob)
+    a.dataset.downloadurl = ['text/json', a.download, a.href].join(':')
+    e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+    a.dispatchEvent(e)
+  }
+})(console)
